@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Dokument bez tytułu</title>
+<style>
+body
+{
+margin:0px;
+padding:0px;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+background-color:darkgray;
+}
+</style>
+</head>
+
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const canvasElem = document.getElementById('canvas');
+const ctx = canvasElem.getContext('2d');
+    
+ const mapaS=27//szerokośść kratek mapki
+    
+canvas.width = 620;
+canvas.height= 620;
+const kwadratS=21;
+var siatkaX=0//początek
+var siatkaY=0//początek
+var zapamietanyK//zapamietuje kierunek
+
+var kolizjaPower=false//włączanie kolizi malinki
+
+var dropM=2000//czas pokazywania się malinki
+
+var slodyczX//tworzy maline
+var slodyczY//tworzy maline
+ 
+ 
+var dlogoscW=3//dlugość wenza
+var ZmianaDlogosciWenza=4//po zebraniu maliny zmiana dlugosci
+
+
+var lastK=[]//tablica do przechwytywania ostatniego położenia
+
+var snakeX=canvas.width/2-11 //-11 żeby było po środku
+var snakeY=canvas.height/2-22  //-11 żeby było po środku
+    
+
+
+    ctx.beginPath()//start rysowania
+    ctx.fillStyle="black"
+    ctx.rect(0,0,canvas.width,canvas.height)//kwadrat czarne pole
+    ctx.fill()//koniec
+    
+    
+    document.addEventListener("click",function()
+                {
+                //klik
+                })
+                              
+                              
+                              
+                              
+    document.addEventListener("keydown",function(event)//Ważne nadsłuchiwanie zdarzeń
+        {
+        if(event.keyCode==zapamietanyK||zapamietanyK==event.keyCode-2||zapamietanyK==event.keyCode+2)//jeżeli bedziemy chcieli odwrócić się do tyłu albo przyszpieszyć sn
+            {
+                
+            }
+        else{
+        switch (event.keyCode) 
+        {
+        case 37:move(37); break;//włączanie zmiennej po kliknięciu przycisku
+        case 38:move(38); break;//góra
+        case 39:move(39); break;//prawo
+        case 40:move(40); break;//duł
+        case 32:{}; break;//spacja 
+        }
+        }    
+    })
+    
+    
+    function mapa()//rysowanie mapy
+    {
+        siatkaY=0//resetowanie współżędnych do kolejnego narysowania mapy
+        siatkaX=0
+        
+        ctx.clearRect(0,0,canvas.width,canvas.height)//czyszczenie pola (nieppotrzebne)
+        
+        ctx.beginPath()
+        ctx.fillStyle="black"
+        ctx.rect(0,0,canvas.width,canvas.height)
+        ctx.fill()
+        
+        ctx.beginPath()//start rysowanie zielonych kratek
+        ctx.fillStyle="green" 
+        for(o=0;o<mapaS;o++)//15 szerokość
+            {      
+            ctx.rect(siatkaX,siatkaY,kwadratS,kwadratS)
+        for(i=0;i<mapaS;i++)//15 długość
+            {
+            ctx.rect(siatkaX,siatkaY,kwadratS,kwadratS)   
+             siatkaX+=23//malowanie mapy i kratek
+            }
+            siatkaY+=24
+            siatkaX=0    
+            }
+        ctx.fill()
+    }
+    
+    
+    
+    
+    function snake()//wąż
+    {
+        
+        ctx.beginPath()
+        ctx.fillStyle="yellow"
+        
+        for(k2=0;k2<(dlogoscW*2)-1;k2=k2+2)
+        {    
+    //rysowanie węża wybieramy pierwszą wartość z tablicy czyli snakeX następnie dodajemy do tablicy 1 (lastK[k2+1]) czyli wybieramy następną i ona odpowiada za snakeY nastpnie pomijamy te dwie tablice czyli (k2=k2+2) 
+            ctx.rect(lastK[k2],lastK[k2+1],kwadratS,kwadratS)
+            
+        }
+       
+        ctx.fill()
+
+    }
+    
+
+    var move=function (kierunek)
+    {
+        kolizja()
+        for(h=(dlogoscW*2)-1;h>0;h=h-2)
+            {
+        //tablica lastK odpowiada za poszczególny snakeX i snakeY DZAIŁANIE:zaczynając od ostatniego czyli dlugoscw*2 (-1 bo tablica od 0) odejmujemy najpierw 2 żeby wziąść snakeX od poprzedniego i wybieramy kolejną tablice czyli h-1 i wybieramy znowu poprzednią(6h roboty)
+                lastK[h]=lastK[h-2]
+                lastK[h-1]=lastK[h-3]
+            }
+   
+        lastK[0]=snakeX
+        lastK[1]=snakeY
+        
+        //tablica przechwytywania pozycji ostatniej węża
+        if(kierunek==undefined)//gdy nie klikamy wąż leci w strone ostatniego kliknięcia
+            {
+             kierunek=zapamietanyK   
+            }
+        if(kierunek==37)
+            {
+             snakeX-=23
+            zapamietanyK=37
+            }
+        if(kierunek==38)
+            {
+            snakeY-=24 
+            zapamietanyK=38
+            }
+        if(kierunek==39)
+            {
+             snakeX+=23  
+            zapamietanyK=39
+            }
+        if(kierunek==40)
+            {
+             snakeY+=24 
+            zapamietanyK=40
+            }
+    }
+    
+   function kolizja()
+            {
+       if(kolizjaPower==true) 
+       {
+if(slodyczX+kwadratS<snakeX||snakeX+kwadratS<slodyczX||slodyczY+kwadratS<snakeY||snakeY+kwadratS<slodyczY) {}
+            else
+            {
+            kolizjaPower=false
+            punkty()
+            setTimeout(malina,2000)
+            } } 
+            if(snakeX>canvas.width||snakeX<0||snakeY>canvas.height||snakeY<0)
+                {
+                    reset()
+                }
+                if(dlogoscW>5)
+                {
+                    //aolsjhdajhnoadjsnf kolizja wenża
+                    }
+                
+              
+            }
+    
+    function Owoc_maluj()
+    {
+       
+        ctx.beginPath()
+        ctx.fillStyle="red"
+          ctx.rect(slodyczX,slodyczY,kwadratS,kwadratS) 
+          ctx.fill()  
+    }
+    
+   
+    //alert("snakeX :"+snakeX+" snakeY :"+snakeY+" slodyczX :"+slodyczX+" slodyczY :"+slodyczY)
+    
+   function malina()//W randomowym miejscu powstanie maliny 
+    {
+    slodyczX=(Math.floor(Math.random()*610)+1)
+    slodyczY=(Math.floor(Math.random()*610)+1)
+    kolizjaPower=true
+    }
+    
+    function play()
+    {
+    mapa()
+    Owoc_maluj()    
+    move() 
+    snake() 
+   
+    setTimeout(play,130)    
+    }
+    
+    
+    function reset()
+    {
+        dlogoscW=3
+        ZmianaDlogosciWenza=4
+        lastK=[]//tablica do przechwytywania ostatniego położenia
+        snakeX=canvas.width/2-11 //-11 żeby było po środku
+        snakeY=canvas.height/2-22  //-11 żeby było po środku
+        zapamietanyK=0
+    }
+    
+    
+    
+   function punkty()
+    {
+       dlogoscW=dlogoscW+ZmianaDlogosciWenza
+       slodyczX=-kwadratS 
+       slodyczY=-kwadratS 
+    }
+    
+    play()
+    setTimeout(malina,dropM)
+ 
+  
+</script>
+</body>
+</html>
